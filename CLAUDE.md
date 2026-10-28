@@ -43,7 +43,7 @@ Toda tarea termina con `npm run lint`, `npm test` y `npm run build` sin errores 
 - **E2E en `e2e/`:** Playwright contra el build de producción, en móvil (Pixel 7) y escritorio. Los Server Components `async` (páginas que llaman a `lib/data.ts`) solo se prueban aquí: Vitest no los soporta.
 - **Agnósticos al negocio:** nunca escribir textos de un negocio en un test. Los E2E leen la config activa desde `e2e/site.ts` y `data.test.ts` deriva sus aserciones de `activeSite.content`; así pasan con cualquier `SITE_ID` y en cualquier clon.
 - **`src/sites/sites.test.ts`** valida el contenido de **todos** los negocios registrados (slugs únicos y aptos para URL, fechas ISO, ratings 1–5, reseñas enlazadas a trabajos existentes, `alt` no vacío, colores hex y contraste WCAG AA de los pares texto/fondo del tema). Es la red de seguridad al editar `config.ts`/`content.ts` de un cliente.
-- **CI:** `.github/workflows/ci.yml` (GitHub Actions) corre lint + unitarios una vez y build + E2E por cada negocio de la matriz `site`. Al agregar o quitar un negocio en `src/sites/`, actualiza esa matriz. Con `CI=true`, Playwright no compila: usa el build del paso previo. Vercel no corre tests.
+- **CI:** `.github/workflows/ci.yml` (GitHub Actions) corre lint + unitarios una vez, build + E2E por cada negocio de la matriz `site` y un job final `CI completo` que falla si algún job anterior falló o se omitió. La protección de `main` (se configura en cada repo; el template no la copia) exige solo `Lint y tests unitarios` y `CI completo`, nombres que no cambian con la matriz: no renombrar esos jobs. Al agregar o quitar un negocio en `src/sites/`, actualiza la matriz. Con `CI=true`, Playwright no compila: usa el build del paso previo. Vercel no corre tests.
 - Un trabajo inexistente (`/trabajos/<slug>`) responde 200 en la primera visita por el streaming de Cache Components; Next.js renderiza not-found e inyecta `noindex`. Es el comportamiento documentado; el E2E verifica eso y no el código HTTP.
 
 ## Arquitectura
@@ -92,7 +92,7 @@ Esta versión difiere de lo que suele conocerse de Next.js; consulta `node_modul
 
 | Necesidad | Cómo hacerlo |
 | --- | --- |
-| Quitar demos | Borrar carpetas sobrantes de `src/sites/`, dejar un solo negocio en `src/sites/index.ts` y ajustar `DEFAULT_SITE`. |
+| Quitar demos | Borrar carpetas sobrantes de `src/sites/`, dejar un solo negocio en `src/sites/index.ts`, ajustar `DEFAULT_SITE` y dejar solo ese sitio en la matriz `site` de `.github/workflows/ci.yml`. Configurar en GitHub la protección de `main` (ver README → Integración continua). |
 | Nueva sección del home | Tipo en `types/content.ts` → contenido en `content.ts` → getter en `lib/data.ts` → componente en `components/sections/` (props, sin config) → clave en `SectionKey`, `sections` y `labels` → render condicional en `(site)/page.tsx` → navegación en `lib/navigation.ts`. |
 | Nueva página pública | `src/app/(site)/<ruta>/page.tsx` con `metadata` (title + `alternates.canonical`) y agregarla a `sitemap.ts`. |
 | Login / panel | Grupos `src/app/(auth)/` y `src/app/(dashboard)/` con layout propio; protección de rutas en `src/proxy.ts` (reemplaza a middleware en Next 16). El sitio público no debe depender de la sesión. |

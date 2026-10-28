@@ -38,6 +38,13 @@ npm run start      # sirve el build
 npm run lint
 ```
 
+La base incluye dos negocios de ejemplo para comprobar que todo cambia sin tocar componentes:
+
+```bash
+npm run dev                          # construction (por defecto)
+SITE_ID=barbershop npm run dev       # barbería de ejemplo
+```
+
 ## Tests
 
 ```bash
@@ -54,18 +61,17 @@ npm run test:e2e                  # E2E (Playwright) contra el build de producci
 
 ### Integración continua
 
-`.github/workflows/ci.yml` corre en GitHub Actions en cada push a `main` y en cada pull request: lint y tests unitarios, y luego build + E2E por cada negocio de `src/sites`. Si falla un E2E, el reporte de Playwright queda como artefacto del run.
+`.github/workflows/ci.yml` corre en GitHub Actions en cada push a `main` y en cada pull request: lint y tests unitarios, build + E2E por cada negocio de `src/sites`, y al final el job **CI completo**, que solo pasa si todo lo anterior pasó. Si falla un E2E, el reporte de Playwright queda como artefacto del run.
 
-Vercel no ejecuta los tests: solo hace el build y publica. Para que no se publique nada roto, en GitHub activa **Settings → Branches → Branch protection** sobre `main` y marca los checks de CI como obligatorios.
+Vercel no ejecuta los tests: solo hace el build y publica. Para que no llegue nada roto a `main` (y por tanto a producción), protege la rama en GitHub. Hazlo en **cada repo** (la base y cada clon), porque "Use this template" copia los archivos pero no la configuración de GitHub:
 
-En un clon de cliente, deja en la matriz `site` del workflow solo el sitio del cliente.
+1. **Settings → Rules → Rulesets → New branch ruleset**, con `main` como rama objetivo.
+2. Activa **Require a pull request before merging** y **Block force pushes**.
+3. Activa **Require status checks to pass** y agrega (escribiendo el nombre en el buscador) **`Lint y tests unitarios`** y **`CI completo`**. Activa también **Require branches to be up to date before merging**.
 
-La base incluye dos negocios de ejemplo para comprobar que todo cambia sin tocar componentes:
+Exige solo esos dos checks: los de build + E2E cambian de nombre según la matriz, y `CI completo` ya los cubre.
 
-```bash
-npm run dev                          # construction (por defecto)
-SITE_ID=barbershop npm run dev       # barbería de ejemplo
-```
+En un clon de cliente, deja en la matriz `site` del workflow solo el sitio del cliente; la regla de protección no cambia.
 
 ## Estructura
 
