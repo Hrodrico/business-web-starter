@@ -21,6 +21,8 @@ Next.js 16 (App Router, `cacheComponents` + `partialPrefetching`), React 19, Typ
 
 - **Versión de Node:** la fija `engines.node` (`"24.x"`) en `package.json`, que es la fuente que leen Vercel y la validación de `next.config.ts`. `.nvmrc` la replica para nvm y para el CI. `.npmrc` (`engine-strict`) hace fallar `npm install` si Node o una dependencia no la cumplen.
 - **Para cambiar de versión** (ej: a 26 cuando Vercel la soporte; hoy solo ofrece 22.x y 24.x): actualiza `engines.node`, `.nvmrc` y `@types/node` al mismo major, y luego `npm install` + verificación completa.
+- **TypeScript fijado en `~6.0`** (no `^`): `typescript-eslint`, incluido en `eslint-config-next`, solo soporta `< 6.1`. TypeScript 7 (compilador nativo en Go) no expone la API de JS y rompe el lint. Subir solo cuando `typescript-eslint` lo soporte.
+- **ESLint 10:** `npm install` muestra 3 avisos `ERESOLVE overriding peer dependency` porque `eslint-plugin-react`, `eslint-plugin-jsx-a11y` y `eslint-plugin-import` aún no declaran ESLint 10. Son esperados: sus reglas se verificaron y funcionan. Desaparecen cuando esos plugins actualicen su rango.
 
 ```bash
 npm run dev                      # sitio por defecto
