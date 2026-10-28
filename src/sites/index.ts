@@ -1,9 +1,9 @@
 import type { SiteConfig } from "@/types/site";
 import type { SiteContent } from "@/types/content";
-import * as construccion from "./construccion/config";
-import * as construccionContent from "./construccion/content";
-import * as barberia from "./barberia/config";
-import * as barberiaContent from "./barberia/content";
+import * as construction from "./construction/config";
+import * as constructionContent from "./construction/content";
+import * as barbershop from "./barbershop/config";
+import * as barbershopContent from "./barbershop/content";
 
 export type Site = {
   config: SiteConfig;
@@ -14,14 +14,14 @@ export type Site = {
  * Sitios disponibles en la base. Al clonar para un cliente, deja solo su
  * carpeta, registra aquí ese único sitio y borra los demás.
  */
-const sites = {
-  construccion: { config: construccion.config, content: construccionContent.content },
-  barberia: { config: barberia.config, content: barberiaContent.content },
+export const sites = {
+  construction: { config: construction.config, content: constructionContent.content },
+  barbershop: { config: barbershop.config, content: barbershopContent.content },
 } satisfies Record<string, Site>;
 
 type SiteId = keyof typeof sites;
 
-const DEFAULT_SITE: SiteId = "construccion";
+const DEFAULT_SITE: SiteId = "construction";
 
 function resolveSite(): Site {
   const id = process.env.SITE_ID ?? DEFAULT_SITE;

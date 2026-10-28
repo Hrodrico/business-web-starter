@@ -2,6 +2,8 @@
 
 # CLAUDE.md
 
+Este archivo orienta a Claude Code (claude.ai/code) al trabajar con el código de este repositorio.
+
 Guía para trabajar en este repositorio y en los proyectos clonados desde él.
 
 ## Qué es este repo
@@ -15,16 +17,32 @@ Antes de cambiar algo, identifica en cuál de los dos contextos estás:
 
 ## Stack y comandos
 
-Next.js 16 (App Router, `cacheComponents` + `partialPrefetching`), React 19, TypeScript estricto, Tailwind CSS 4, despliegue en Vercel. Node >= 20.19.
+Next.js 16 (App Router, `cacheComponents` + `partialPrefetching`), React 19, TypeScript estricto, Tailwind CSS 4, despliegue en Vercel. **Node 24 LTS obligatorio** (`nvm use`).
+
+- **Versión de Node:** la fija `engines.node` (`"24.x"`) en `package.json`, que es la fuente que leen Vercel y la validación de `next.config.ts`. `.nvmrc` la replica para nvm y para el CI. `.npmrc` (`engine-strict`) hace fallar `npm install` si Node o una dependencia no la cumplen.
+- **Para cambiar de versión** (ej: a 26 cuando Vercel la soporte; hoy solo ofrece 22.x y 24.x): actualiza `engines.node`, `.nvmrc` y `@types/node` al mismo major, y luego `npm install` + verificación completa.
 
 ```bash
 npm run dev                      # sitio por defecto
-SITE_ID=barberia npm run dev     # otro negocio de src/sites
+SITE_ID=barbershop npm run dev   # otro negocio de src/sites
 npm run lint
+npm test                         # unitarios (Vitest)
+npx vitest run src/lib/contact.test.ts   # un solo archivo (o: npx vitest run -t "nombre del test")
+npm run test:watch
+npm run test:e2e                 # E2E (Playwright): hace build + start en el puerto 3100
 npm run build                    # verificación obligatoria antes de cerrar una tarea
 ```
 
-No hay tests automatizados todavía. Como mínimo, toda tarea termina con `npm run lint` y `npm run build` sin errores; en la base, ejecuta además `SITE_ID=barberia npm run build` para confirmar que el cambio no depende de un negocio.
+Toda tarea termina con `npm run lint`, `npm test` y `npm run build` sin errores (y `npm run test:e2e` si toca rutas, layouts o páginas). En la base, ejecuta además `SITE_ID=barbershop npm run build` y `SITE_ID=barbershop npm run test:e2e` para confirmar que el cambio no depende de un negocio. La primera vez, `npx playwright install chromium`.
+
+### Tests
+
+- **Unitarios junto al archivo:** `Rating.tsx` → `Rating.test.tsx` en la misma carpeta (Vitest + Testing Library, jsdom). Si se borra o copia un componente, su test va con él. Cubren `lib/`, componentes síncronos y el contenido.
+- **E2E en `e2e/`:** Playwright contra el build de producción, en móvil (Pixel 7) y escritorio. Los Server Components `async` (páginas que llaman a `lib/data.ts`) solo se prueban aquí: Vitest no los soporta.
+- **Agnósticos al negocio:** nunca escribir textos de un negocio en un test. Los E2E leen la config activa desde `e2e/site.ts` y `data.test.ts` deriva sus aserciones de `activeSite.content`; así pasan con cualquier `SITE_ID` y en cualquier clon.
+- **`src/sites/sites.test.ts`** valida el contenido de **todos** los negocios registrados (slugs únicos y aptos para URL, fechas ISO, ratings 1–5, reseñas enlazadas a trabajos existentes, `alt` no vacío, colores hex y contraste WCAG AA de los pares texto/fondo del tema). Es la red de seguridad al editar `config.ts`/`content.ts` de un cliente.
+- **CI:** `.github/workflows/ci.yml` (GitHub Actions) corre lint + unitarios una vez y build + E2E por cada negocio de la matriz `site`. Al agregar o quitar un negocio en `src/sites/`, actualiza esa matriz. Con `CI=true`, Playwright no compila: usa el build del paso previo. Vercel no corre tests.
+- Un trabajo inexistente (`/trabajos/<slug>`) responde 200 en la primera visita por el streaming de Cache Components; Next.js renderiza not-found e inyecta `noindex`. Es el comportamiento documentado; el E2E verifica eso y no el código HTTP.
 
 ## Arquitectura
 
@@ -42,6 +60,11 @@ src/lib/
 src/sites/<id>/     config.ts (SiteConfig) + content.ts (SiteContent) por negocio
 src/types/          Contratos: site.ts (configuración), content.ts (contenido)
 ```
+
+### Flujos que cruzan archivos
+
+- **Negocio activo:** `src/sites/index.ts` registra los negocios y resuelve `SITE_ID` (o `DEFAULT_SITE`) al cargar el módulo; un `SITE_ID` inexistente lanza error. `lib/site.ts` expone su `config` y `lib/data.ts` su `content`. Agregar un negocio = carpeta nueva + entrada en el objeto `sites`.
+- **Tema:** `config.theme` → `themeToCssVars()` (`lib/theme.ts`) lo aplica como variables `--brand-*` en el `<html>` del layout raíz → `globals.css` las mapea a tokens de Tailwind (`--color-primary`, etc.) con `@theme inline`. Un color nuevo requiere tocar `ThemeColors`, `theme.ts`, `globals.css` y cada `config.ts`.
 
 ### Reglas que no se rompen
 
@@ -97,6 +120,6 @@ Si una mejora hecha en un clon es genérica (sirve a cualquier rubro), anótala 
 - TypeScript estricto, sin `any`. Tipos de dominio en `src/types/`, props tipadas con `type Props`.
 - Exports nombrados para componentes (`export function HeroSection`); `export default` solo donde Next.js lo exige (pages, layouts, robots, sitemap).
 - Alias `@/` para imports desde `src/`.
-- Textos de UI y contenido en español; nombres de código (variables, tipos, archivos) en inglés.
+- **Idioma:** el código va en inglés (identificadores, archivos, carpetas, ids de `src/sites/`). En español: lo que ve el cliente final (textos de UI, contenido, metadatos SEO, URL públicas como `/trabajos` y anclas como `#servicios`) y lo dirigido a desarrolladores (comentarios, mensajes de error, logs y documentación).
 - Comentarios breves y solo cuando explican el porqué.
 - Commits pequeños y descriptivos; no commitear sin que `npm run build` pase.

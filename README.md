@@ -26,7 +26,7 @@ Los clones no se sincronizan con la base. Si mejoras algo aquí, cópialo manual
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [Vercel](https://vercel.com/) para hosting
 
-Requiere **Node.js 20.19 o superior** (recomendado: 22 LTS).
+Requiere **Node.js 24 LTS** (obligatorio). Con `nvm use` se activa la versión de `.nvmrc`. Con otra versión, `npm install` falla (`engine-strict` en `.npmrc`) y `dev`/`build`/`start` se detienen con un aviso.
 
 ## Desarrollo local
 
@@ -38,11 +38,33 @@ npm run start      # sirve el build
 npm run lint
 ```
 
+## Tests
+
+```bash
+npm test                          # unitarios (Vitest), una pasada
+npm run test:watch                # unitarios en modo watch
+npx playwright install chromium   # solo la primera vez
+npm run test:e2e                  # E2E (Playwright) contra el build de producción
+```
+
+- Los tests unitarios viven **junto a cada archivo** (`Rating.tsx` + `Rating.test.tsx`).
+- Los E2E viven en `e2e/` y recorren el sitio en móvil y escritorio.
+- `src/sites/sites.test.ts` valida el contenido de cada negocio: slugs, fechas, reseñas, textos `alt` y el contraste de los colores del tema.
+- Los tests no dependen de un negocio: `SITE_ID=barbershop npm run test:e2e` prueba la otra demo.
+
+### Integración continua
+
+`.github/workflows/ci.yml` corre en GitHub Actions en cada push a `main` y en cada pull request: lint y tests unitarios, y luego build + E2E por cada negocio de `src/sites`. Si falla un E2E, el reporte de Playwright queda como artefacto del run.
+
+Vercel no ejecuta los tests: solo hace el build y publica. Para que no se publique nada roto, en GitHub activa **Settings → Branches → Branch protection** sobre `main` y marca los checks de CI como obligatorios.
+
+En un clon de cliente, deja en la matriz `site` del workflow solo el sitio del cliente.
+
 La base incluye dos negocios de ejemplo para comprobar que todo cambia sin tocar componentes:
 
 ```bash
-npm run dev                          # construccion (por defecto)
-SITE_ID=barberia npm run dev         # barbería de ejemplo
+npm run dev                          # construction (por defecto)
+SITE_ID=barbershop npm run dev       # barbería de ejemplo
 ```
 
 ## Estructura
@@ -70,8 +92,8 @@ src/
     theme.ts                 Colores → variables CSS
   sites/
     index.ts                 Registro de negocios y selección por SITE_ID
-    construccion/            config.ts + content.ts (Noua Construcción)
-    barberia/                config.ts + content.ts (demo)
+    construction/            config.ts + content.ts (Noua Construcción)
+    barbershop/              config.ts + content.ts (demo)
   types/
     site.ts                  Contrato de configuración (SiteConfig)
     content.ts               Contrato de contenido (Project, Review, Service…)
