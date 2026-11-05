@@ -141,6 +141,18 @@ En el repositorio del cliente:
 
 1. Borra las carpetas de `src/sites/` que no correspondan.
 2. En `src/sites/index.ts`, deja registrado solo ese negocio y ajusta `DEFAULT_SITE`.
+3. Regenera el grafo de graphify con `graphify update .`, porque el que trae el clon describe la base. Si el clon no usará graphify, borra `graphify-out/` y la sección `## graphify` de `CLAUDE.md`.
+
+### 5. graphify (opcional)
+
+El repositorio incluye un grafo del código en `graphify-out/` y la skill en `.claude/skills/graphify/`, que Claude Code usa para orientarse en el proyecto. Para usarlo, instala la CLI una vez por máquina:
+
+```bash
+uv tool install graphifyy   # o: pipx install graphifyy
+graphify hook install       # hook post-commit que actualiza el grafo después de cada commit
+```
+
+El hook de git no se copia con el repositorio: instálalo en cada clon. Los hooks de Claude Code (`.claude/settings.json`) no hacen nada si graphify no está instalado.
 
 ## Cómo crecer en un proyecto (fuera de la base)
 
