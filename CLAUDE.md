@@ -92,7 +92,7 @@ Esta versión difiere de lo que suele conocerse de Next.js; consulta `node_modul
 
 | Necesidad | Cómo hacerlo |
 | --- | --- |
-| Quitar demos | Borrar carpetas sobrantes de `src/sites/`, dejar un solo negocio en `src/sites/index.ts`, ajustar `DEFAULT_SITE` y dejar solo ese sitio en la matriz `site` de `.github/workflows/ci.yml`. Configurar en GitHub la protección de `main` (ver README → Integración continua). |
+| Quitar demos | Borrar carpetas sobrantes de `src/sites/`, dejar un solo negocio en `src/sites/index.ts`, ajustar `DEFAULT_SITE` y dejar solo ese sitio en la matriz `site` de `.github/workflows/ci.yml`. Regenerar el grafo con `graphify update .` (o borrar `graphify-out/` si no se usa). Configurar en GitHub la protección de `main` (ver README → Integración continua). |
 | Nueva sección del home | Tipo en `types/content.ts` → contenido en `content.ts` → getter en `lib/data.ts` → componente en `components/sections/` (props, sin config) → clave en `SectionKey`, `sections` y `labels` → render condicional en `(site)/page.tsx` → navegación en `lib/navigation.ts`. |
 | Nueva página pública | `src/app/(site)/<ruta>/page.tsx` con `metadata` (title + `alternates.canonical`) y agregarla a `sitemap.ts`. |
 | Login / panel | Grupos `src/app/(auth)/` y `src/app/(dashboard)/` con layout propio; protección de rutas en `src/proxy.ts` (reemplaza a middleware en Next 16). El sitio público no debe depender de la sesión. |
@@ -135,4 +135,5 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- If the graph does not match the code (e.g. a client clone whose graph still describes the base, or the guard reports stale files), run `graphify update .` before relying on it.
 - A committed graphify-out/graph.json is rewritten whole on every build, so a large diff to it in a pull request is expected. Do not flag it as churn or suggest skipping the graph rebuild or its hooks.
