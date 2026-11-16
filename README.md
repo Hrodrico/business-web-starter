@@ -2,7 +2,7 @@
 
 Base reutilizable para crear el sitio web de un negocio con **Next.js**, **TypeScript** y **Tailwind CSS**, desplegada en **Vercel**.
 
-Trae lo que todo negocio necesita desde el día uno: **home, servicios, trabajos realizados con reseñas, contacto (WhatsApp, teléfono, correo) y redes sociales**. Cada proyecto nuevo (construcción, barbería, mecánica, fletes, e-commerce…) parte clonando este repositorio y crece por su cuenta: uno puede quedarse como sitio informativo y otro sumar login, agenda o carrito.
+Trae lo que todo negocio necesita desde el día uno: **home, servicios, trabajos realizados con reseñas, contacto (WhatsApp, teléfono, correo) y redes sociales**, con modo claro/oscuro, carrusel de fotos y vistas previas mientras cargan las imágenes. Cada proyecto nuevo (construcción, barbería, mecánica, fletes, e-commerce…) parte clonando este repositorio y crece por su cuenta: uno puede quedarse como sitio informativo y otro sumar login, agenda o carrito.
 
 ## Cómo se usa
 
@@ -36,6 +36,7 @@ npm run dev        # http://localhost:3000
 npm run build      # build de producción
 npm run start      # sirve el build
 npm run lint
+npm run images:placeholders   # vistas previas de las fotos (corre solo antes de dev y build)
 ```
 
 La base incluye dos negocios de ejemplo para comprobar que todo cambia sin tocar componentes:
@@ -76,31 +77,38 @@ src/
   app/
     layout.tsx               Layout raíz: <html>, fuente, tema y metadatos SEO
     (site)/                  Sitio público (grupo de rutas)
-      layout.tsx             Header, footer y botón de WhatsApp
+      layout.tsx             Header (con botón sol/luna), footer y botón de WhatsApp
       page.tsx               Home: hero + secciones activas
       trabajos/page.tsx      Listado de trabajos realizados
-      trabajos/[slug]/       Detalle de un trabajo con sus reseñas
+      trabajos/[slug]/       Detalle de un trabajo: galería, reseñas y skeleton de carga
     not-found.tsx
     robots.ts, sitemap.ts
   components/
-    layout/                  Header, Footer, MobileMenu, Container
+    layout/                  Header, Footer, MobileMenu, Container, HashlessSectionLinks
     sections/                Hero, About, Services, Projects, Reviews, Contact
-    ui/                      ButtonLink, Media, Rating, SocialLinks, iconos…
+    ui/                      ButtonLink, Media, ImageCarousel, ImageGallery, ThemeToggle,
+                             Breadcrumbs, Rating, SocialLinks, iconos…
   lib/
     data.ts                  Capa de acceso a datos (getServices, getProjects…)
     site.ts                  Configuración del negocio activo
     contact.ts               Enlaces wa.me, tel: y mailto:
     navigation.ts            Menú derivado de las secciones activas
-    theme.ts                 Colores → variables CSS
+    theme.ts                 Colores → variables CSS y script del modo oscuro
+    images.ts                Aplica las vistas previas generadas al contenido
+    swipe.ts, useSwipeTrack  Gesto de deslizar del carrusel y la galería
   sites/
     index.ts                 Registro de negocios y selección por SITE_ID
-    construction/            config.ts + content.ts (Noua Construcción)
-    barbershop/              config.ts + content.ts (demo)
+    construction/            config.ts + content.ts (demo con modo claro y oscuro)
+    barbershop/              config.ts + content.ts (demo con solo tema oscuro)
   types/
     site.ts                  Contrato de configuración (SiteConfig)
     content.ts               Contrato de contenido (Project, Review, Service…)
+  generated/
+    image-placeholders.json  Vistas previas generadas (se versiona)
+scripts/
+  generate-image-placeholders.mjs
 public/
-  images/projects/           Fotos de trabajos
+  images/projects/           Fotos de trabajos, en <año>/<slug>/
   logos/
 ```
 
@@ -126,7 +134,7 @@ Hero, quiénes somos, servicios, trabajos realizados (con galería) y reseñas. 
 Copia las fotos a `public/images/...` (formato `.webp` o `.jpg`) y referéncialas en el contenido:
 
 ```ts
-cover: { src: "/images/projects/cocina-nunoa.webp", alt: "Cocina remodelada con isla central" },
+cover: { src: "/images/projects/2026/remodelacion-cocina-nunoa/cocina.webp", alt: "Cocina remodelada con isla central" },
 ```
 
 Las fotos de cada trabajo van en `/images/projects/<año>/<slug>/` (lo verifica `sites.test.ts`). En `hero.images`, una imagen se muestra fija y varias como carrusel; la galería de cada trabajo se desliza con el dedo o arrastrando.
@@ -145,7 +153,9 @@ En el repositorio del cliente:
 
 1. Borra las carpetas de `src/sites/` que no correspondan.
 2. En `src/sites/index.ts`, deja registrado solo ese negocio y ajusta `DEFAULT_SITE`.
-3. Regenera el grafo de graphify con `graphify update .`, porque el que trae el clon describe la base. Si el clon no usará graphify, borra `graphify-out/` y la sección `## graphify` de `CLAUDE.md`.
+3. En `.github/workflows/ci.yml`, deja solo ese sitio en la matriz `site`.
+4. Importa en GitHub la protección de `main` desde `.github/rulesets/main.json` (ver Integración continua).
+5. Regenera el grafo de graphify con `graphify update .`, porque el que trae el clon describe la base. Si el clon no usará graphify, borra `graphify-out/` y la sección `## graphify` de `CLAUDE.md`.
 
 ### 5. graphify (opcional)
 
@@ -174,14 +184,7 @@ El hook de git no se copia con el repositorio: instálalo en cada clon. Los hook
 2. Si el repositorio aún tiene varios negocios, define la variable `SITE_ID`.
 3. Asigna el dominio y actualiza `url` en la configuración del negocio.
 
-## Antes de publicar
-
-- [ ] `url` con el dominio real (se usa en canonical, sitemap y Open Graph).
-- [ ] Teléfono, WhatsApp (con código de país), correo y redes reales; nada de datos `example.com` ni `0000`.
-- [ ] Textos y reseñas reales (no publicar contenido de ejemplo como si fuera verdadero).
-- [ ] Fotos con texto alternativo descriptivo, logo, favicon y `seo.ogImage`.
-- [ ] Revisar en móvil, tablet y escritorio.
-- [ ] `npm run build` sin errores.
+Vercel publica cada push a `main` en producción y cada PR como vista previa.
 
 > Nota: con Cache Components, una URL de trabajo inexistente (`/trabajos/no-existe`) muestra la página 404 con `noindex`, pero responde HTTP 200 porque la página se transmite por streaming. Es el comportamiento esperado de Next.js 16.
 
