@@ -101,6 +101,36 @@ export const CloseIcon = (props: IconProps) => (
   </svg>
 );
 
+export const ChevronLeftIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
+);
+
+export const ChevronRightIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <path d="M9 18l6-6-6-6" />
+  </svg>
+);
+
+export const ExpandIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+  </svg>
+);
+
+export const PauseIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <path d="M9 5v14M15 5v14" />
+  </svg>
+);
+
+export const PlayIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <path d="M7 5l12 7-12 7z" />
+  </svg>
+);
+
 export const socialIcons: Record<SocialNetwork, (props: IconProps) => React.JSX.Element> = {
   instagram: InstagramIcon,
   facebook: FacebookIcon,
@@ -118,3 +148,16 @@ export const socialNames: Record<SocialNetwork, string> = {
   linkedin: "LinkedIn",
   x: "X",
 };
+
+export const SunIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+  </svg>
+);
+
+export const MoonIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+  </svg>
+);

@@ -40,6 +40,8 @@ export type ThemeColors = {
   primaryForeground: string;
   accent: string;
   accentForeground: string;
+  /** Acento usado como texto sobre background y surface: versión más oscura de accent que cumple 4.5:1. */
+  accentText: string;
   background: string;
   foreground: string;
   /** Fondo de tarjetas y secciones alternas. */
@@ -65,8 +67,15 @@ export type SiteConfig = {
   branding: {
     /** Ruta en /public. Si se omite, se muestra el nombre como texto. */
     logo?: string;
+    /** Versión del logo para modo oscuro (ruta en /public). Sin valor, se usa `logo` en ambos modos. */
+    logoDark?: string;
   };
   theme: ThemeColors;
+  /**
+   * Paleta para el modo oscuro. Si existe, el sitio sigue la preferencia del sistema y muestra
+   * en el header un botón para cambiar entre claro y oscuro (la elección se recuerda).
+   */
+  themeDark?: ThemeColors;
   seo: {
     title: string;
     description: string;
@@ -78,4 +87,13 @@ export type SiteConfig = {
   sections: Record<SectionKey, boolean>;
   /** Títulos visibles de cada sección, adaptados al rubro. */
   labels: Record<SectionKey, string>;
+  /** Textos de botones adaptados al rubro. Sin valor, se usa un texto genérico. */
+  actions?: {
+    /** Botón principal hacia contacto (header y cierre de cada trabajo), ej: "Cotiza tu proyecto". */
+    quote?: string;
+    /** Enlace del home al listado completo de trabajos, ej: "Ver todas las obras". */
+    allProjects?: string;
+    /** Enlace al pie de cada tarjeta de trabajo, ej: "Ver obra". */
+    viewProject?: string;
+  };
 };

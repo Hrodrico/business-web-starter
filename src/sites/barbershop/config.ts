@@ -31,6 +31,7 @@ export const config: SiteConfig = {
     primaryForeground: "#111111",
     accent: "#B23A2E",
     accentForeground: "#FFFFFF",
+    accentText: "#E0675B",
     background: "#111111",
     foreground: "#F3EFE7",
     surface: "#1C1B19",
