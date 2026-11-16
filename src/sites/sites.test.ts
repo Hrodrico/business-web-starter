@@ -1,4 +1,7 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import placeholders from "@/generated/image-placeholders.json";
 import { sites } from "./index";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -27,7 +30,7 @@ describe.each(Object.entries(sites))("sitio %s", (_, { config, content }) => {
     });
 
     it("define todos los colores del tema en hex de 6 dígitos", () => {
-      for (const color of Object.values(config.theme)) {
+      for (const color of [...Object.values(config.theme), ...Object.values(config.themeDark ?? {})]) {
         expect(color).toMatch(HEX_COLOR);
       }
     });
@@ -37,8 +40,19 @@ describe.each(Object.entries(sites))("sitio %s", (_, { config, content }) => {
       ["muted", "background"],
       ["primaryForeground", "primary"],
       ["accentForeground", "accent"],
+      ["accentText", "background"],
+      ["accentText", "surface"],
     ] as const)("contraste %s sobre %s >= 4.5 (WCAG AA)", (text, bg) => {
       expect(contrast(config.theme[text], config.theme[bg])).toBeGreaterThanOrEqual(4.5);
+      if (config.themeDark) {
+        expect(contrast(config.themeDark[text], config.themeDark[bg]), "modo oscuro").toBeGreaterThanOrEqual(4.5);
+      }
+    });
+
+    it("los logos configurados existen en public/", () => {
+      for (const logo of [config.branding.logo, config.branding.logoDark]) {
+        if (logo?.startsWith("/")) expect(existsSync(join(process.cwd(), "public", logo)), logo).toBe(true);
+      }
     });
 
     it("no repite redes sociales", () => {
@@ -84,7 +98,7 @@ describe.each(Object.entries(sites))("sitio %s", (_, { config, content }) => {
 
     it("describe todas las imágenes con alt", () => {
       const images = [
-        content.hero.image,
+        ...(content.hero.images ?? []),
         content.about.image,
         ...content.services.map((s) => s.image),
         ...content.projects.flatMap((p) => [p.cover, ...p.gallery]),
@@ -92,6 +106,44 @@ describe.each(Object.entries(sites))("sitio %s", (_, { config, content }) => {
 
       for (const image of images) {
         expect(image.alt.trim()).not.toBe("");
+      }
+    });
+
+    it("usa imágenes locales que existen en /public", () => {
+      const images = [
+        ...(content.hero.images ?? []),
+        content.about.image,
+        ...content.services.map((s) => s.image),
+        ...content.projects.flatMap((p) => [p.cover, ...p.gallery]),
+      ].filter((image) => image !== undefined);
+
+      for (const image of images.filter((i) => i.src.startsWith("/"))) {
+        expect(existsSync(join(process.cwd(), "public", image.src)), image.src).toBe(true);
+      }
+    });
+
+    it("tiene vista previa generada para cada imagen local", () => {
+      const images = [
+        ...(content.hero.images ?? []),
+        content.about.image,
+        ...content.services.map((s) => s.image),
+        ...content.projects.flatMap((p) => [p.cover, ...p.gallery]),
+      ].filter((image) => image !== undefined);
+
+      // Si falla: npm run images:placeholders (también corre antes de dev y build).
+      for (const image of images.filter((i) => i.src.startsWith("/"))) {
+        expect(placeholders, image.src).toHaveProperty([image.src]);
+      }
+    });
+
+    // Fotos de obras en /images/projects/<año>/<slug>/<foto>, para que la carpeta crezca ordenada.
+    it("guarda las fotos de cada trabajo en su carpeta <año>/<slug>", () => {
+      for (const project of content.projects) {
+        const year = project.date?.slice(0, 4) ?? "\\d{4}";
+        const folder = new RegExp(`^/images/projects/${year}/${project.slug}/[a-z0-9-]+\\.(webp|jpe?g|png|avif)$`);
+        for (const image of [project.cover, ...project.gallery].filter((i) => i !== undefined)) {
+          if (image.src.startsWith("/")) expect(image.src).toMatch(folder);
+        }
       }
     });
   });

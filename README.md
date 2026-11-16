@@ -56,18 +56,14 @@ npm run test:e2e                  # E2E (Playwright) contra el build de producci
 
 - Los tests unitarios viven **junto a cada archivo** (`Rating.tsx` + `Rating.test.tsx`).
 - Los E2E viven en `e2e/` y recorren el sitio en móvil y escritorio.
-- `src/sites/sites.test.ts` valida el contenido de cada negocio: slugs, fechas, reseñas, textos `alt` y el contraste de los colores del tema.
+- `src/sites/sites.test.ts` valida el contenido de cada negocio: slugs, fechas, reseñas, textos `alt`, que existan las fotos y los logos locales (y su vista previa) y el contraste de los colores del tema en modo claro y oscuro.
 - Los tests no dependen de un negocio: `SITE_ID=barbershop npm run test:e2e` prueba la otra demo.
 
 ### Integración continua
 
 `.github/workflows/ci.yml` corre en GitHub Actions en cada push a `main` y en cada pull request: lint y tests unitarios, build + E2E por cada negocio de `src/sites`, y al final el job **CI completo**, que solo pasa si todo lo anterior pasó. Si falla un E2E, el reporte de Playwright queda como artefacto del run.
 
-Vercel no ejecuta los tests: solo hace el build y publica. Para que no llegue nada roto a `main` (y por tanto a producción), protege la rama en GitHub. Hazlo en **cada repo** (la base y cada clon), porque "Use this template" copia los archivos pero no la configuración de GitHub:
-
-1. **Settings → Rules → Rulesets → New branch ruleset**, con `main` como rama objetivo.
-2. Activa **Require a pull request before merging** y **Block force pushes**.
-3. Activa **Require status checks to pass** y agrega (escribiendo el nombre en el buscador) **`Lint y tests unitarios`** y **`CI completo`**. Activa también **Require branches to be up to date before merging**.
+Vercel no ejecuta los tests: solo hace el build y publica. Para que no llegue nada roto a `main` (y por tanto a producción), protege la rama en GitHub. Hazlo en **cada repo** (la base y cada clon), porque "Use this template" copia los archivos pero no la configuración de GitHub. La regla está versionada en [`.github/rulesets/main.json`](.github/rulesets/main.json): **Settings → Rules → Rulesets → New ruleset → Import a ruleset**. Exige PR, bloquea force push y borrado, pide la rama al día y los checks **`Lint y tests unitarios`** y **`CI completo`**.
 
 Exige solo esos dos checks: los de build + E2E cambian de nombre según la matriz, y `CI completo` ya los cubre.
 
@@ -133,7 +129,15 @@ Copia las fotos a `public/images/...` (formato `.webp` o `.jpg`) y referénciala
 cover: { src: "/images/projects/cocina-nunoa.webp", alt: "Cocina remodelada con isla central" },
 ```
 
-Mientras no haya foto, se muestra un marcador con los colores del tema. El logo va en `public/logos/` y se configura en `branding.logo`. Reemplaza también `src/app/favicon.ico`.
+Las fotos de cada trabajo van en `/images/projects/<año>/<slug>/` (lo verifica `sites.test.ts`). En `hero.images`, una imagen se muestra fija y varias como carrusel; la galería de cada trabajo se desliza con el dedo o arrastrando.
+
+Mientras cargan, las fotos locales muestran una vista previa difuminada: `npm run images:placeholders` (corre solo antes de `dev` y `build`, con `sharp`) la genera en `src/generated/image-placeholders.json`, que se versiona. Las imágenes remotas no la tienen. Si no hay foto, se muestra un marcador con los colores del tema. En modo oscuro las fotos se atenúan levemente.
+
+**Logo:** va en `public/logos/`, con fondo transparente, y se configura en `branding.logo`. Si en modo oscuro no se ve bien, agrega una versión en `branding.logoDark`. Reemplaza también `src/app/favicon.ico`.
+
+**Colores y modo oscuro:** `theme` es la paleta clara y `themeDark` (opcional) la oscura. Si `themeDark` existe, el sitio sigue la preferencia del sistema y muestra un botón sol/luna en el header; la elección se guarda en el navegador. Un negocio con una sola paleta (la barbería de ejemplo, oscura) no muestra el botón. `accentText` es el acento usado como texto: debe tener contraste de 4,5:1 sobre `background` y `surface`, igual que cada par texto/fondo en ambas paletas.
+
+**Textos de botones:** `actions` (opcional) adapta "Cotiza tu proyecto", "Ver todas las obras", "Ver obra" al rubro; sin valor se usa un texto genérico.
 
 ### 4. Dejar un solo negocio en el clon
 

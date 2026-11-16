@@ -1,8 +1,9 @@
 import { cacheLife } from "next/cache";
 import { site } from "@/lib/site";
 import { whatsappUrl } from "@/lib/contact";
-import { buildNavigation, sectionIds } from "@/lib/navigation";
+import { buildNavigation, heroId, sectionIds } from "@/lib/navigation";
 import { Footer } from "@/components/layout/Footer";
+import { HashlessSectionLinks } from "@/components/layout/HashlessSectionLinks";
 import { Header } from "@/components/layout/Header";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 
@@ -19,11 +20,11 @@ async function getCurrentYear() {
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
   const navigation = buildNavigation(site);
   const { phone, email, address, city, whatsapp } = site.contact;
-  const contactLines = [phone, email, [address, city].filter(Boolean).join(", ")].filter(
+  const contactLines = [email, phone, [address, city].filter(Boolean).join(", ")].filter(
     (line): line is string => Boolean(line),
   );
   const cta = site.sections.contact
-    ? { label: site.labels.contact, href: `/#${sectionIds.contact}` }
+    ? { label: site.actions?.quote ?? site.labels.contact, href: `/#${sectionIds.contact}` }
     : undefined;
 
   return (
@@ -34,7 +35,15 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       >
         Saltar al contenido
       </a>
-      <Header name={site.name} logo={site.branding.logo} navigation={navigation} cta={cta} />
+      <HashlessSectionLinks />
+      <Header
+        name={site.name}
+        logo={site.branding.logo}
+        logoDark={site.themeDark ? site.branding.logoDark : undefined}
+        navigation={navigation}
+        cta={cta}
+        themeToggle={Boolean(site.themeDark)}
+      />
       <main id="contenido" className="flex-1">
         {children}
       </main>
@@ -46,7 +55,14 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
         contactLines={contactLines}
         year={await getCurrentYear()}
       />
-      {whatsapp && <WhatsAppButton href={whatsappUrl(whatsapp)} />}
+      {whatsapp && (
+        <WhatsAppButton
+          href={whatsappUrl(whatsapp)}
+          // El hero tiene sus propios botones (en móvil el flotante tapaba los del carrusel) y
+          // la sección de contacto ya muestra WhatsApp: el botón se oculta mientras se vean.
+          hideWhenVisible={site.sections.contact ? [heroId, sectionIds.contact] : [heroId]}
+        />
+      )}
     </>
   );
 }

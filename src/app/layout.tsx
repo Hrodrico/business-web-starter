@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import { site } from "@/lib/site";
-import { themeToCssVars } from "@/lib/theme";
+import { themeInitScript, themeToCssVars } from "@/lib/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,12 +31,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // suppressHydrationWarning: extensiones (ej. LanguageTool) agregan atributos a <html> antes
+    // de hidratar. Solo afecta los atributos de esta etiqueta, no a sus hijos.
     <html
       lang={site.locale}
-      style={themeToCssVars(site.theme)}
+      style={themeToCssVars(site.theme, site.themeDark)}
       className={`${geistSans.variable} h-full antialiased`}
+      // globals.css usa scroll-behavior: smooth; así Next lo desactiva al cambiar de ruta.
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">
+        {/* Aplica el tema guardado o el del sistema antes de pintar, sin destello del claro. */}
+        {site.themeDark && (
+          <Script id="theme-init" strategy="beforeInteractive">
+            {themeInitScript}
+          </Script>
+        )}
+        {children}
+      </body>
     </html>
   );
 }

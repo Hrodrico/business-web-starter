@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { site } from "@/lib/site";
 import { getProjects } from "@/lib/data";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ProjectsSection } from "@/components/sections/ProjectsSection";
 
 export const metadata: Metadata = {
@@ -20,6 +21,13 @@ export default async function ProjectsPage() {
       label={site.labels.projects}
       projects={projects}
       showAllLink={false}
+      viewProjectLabel={site.actions?.viewProject}
+      breadcrumbs={
+        <Breadcrumbs
+          items={[{ label: "Inicio", href: "/" }, { label: site.labels.projects }]}
+          className="mb-8"
+        />
+      }
     />
   );
 }

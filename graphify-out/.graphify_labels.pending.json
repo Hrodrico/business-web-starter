@@ -1,0 +1,16 @@
+{
+  "1": "devDependencies",
+  "3": "icons.tsx",
+  "5": "generate-image-placeholders.mjs",
+  "7": "next",
+  "11": "vitest",
+  "19": "[slug]/page.tsx",
+  "20": "ContactSection.tsx",
+  "21": "useSwipeTrack.ts",
+  "22": "package.json",
+  "23": "eslint.config.mjs",
+  "24": "next.config.ts",
+  "25": "@vitejs/plugin-react",
+  "26": ".close",
+  "27": ".showModal"
+}
