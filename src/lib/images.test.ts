@@ -1,9 +1,13 @@
-import { describe, expect, it } from "vitest";
-import generated from "@/generated/image-placeholders.json";
+import { describe, expect, it, vi } from "vitest";
 import { activeSite } from "@/sites";
 import { withPlaceholder, withPlaceholders } from "./images";
 
-const [localSrc, localBlur] = Object.entries(generated)[0];
+// JSON simulado: el real depende de las fotos de cada negocio y en la base está vacío.
+const localSrc = "/images/projects/2026/ejemplo/foto.webp";
+const localBlur = "data:image/webp;base64,UklGRg==";
+vi.mock("@/generated/image-placeholders.json", () => ({
+  default: { "/images/projects/2026/ejemplo/foto.webp": "data:image/webp;base64,UklGRg==" },
+}));
 
 describe("withPlaceholder", () => {
   it("agrega la vista previa generada a una imagen local", () => {

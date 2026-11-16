@@ -1,17 +1,17 @@
 # Graph Report - business-web-starter  (2026-11-16)
 
 ## Corpus Check
-- 89 files · ~20,312 words
+- 89 files · ~20,340 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 7 file(s) not represented in the graph (top: (none) 4, .example 1, .ico 1)
 
 ## Summary
-- 448 nodes · 926 edges · 28 communities (18 shown, 10 thin omitted)
+- 448 nodes · 925 edges · 28 communities (18 shown, 10 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 34 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1257c289`
+- Built from commit: `12e23d1c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -77,8 +77,8 @@
 ## Communities (28 total, 10 thin omitted)
 
 ### Community 0 - "Páginas y metadatos SEO"
-Cohesion: 0.08
-Nodes (42): HomePage(), metadata, Container(), Props, AboutSection(), Props, HeroSection(), Props (+34 more)
+Cohesion: 0.07
+Nodes (46): HomePage(), metadata, Container(), Props, AboutSection(), Props, HeroSection(), Props (+38 more)
 
 ### Community 1 - "devDependencies"
 Cohesion: 0.14
@@ -97,8 +97,8 @@ Cohesion: 0.06
 Nodes (24): generate-agent-files.js (next dev re-adds block), node_modules/next/dist/docs (local Next.js docs), Active business flow (sites/index.ts -> lib/site.ts, lib/data.ts), Project architecture (app/components/lib/sites/types), business-web-starter (template base), Cache Components (use cache, cacheLife, connection), CI workflow (.github/workflows/ci.yml), E2E tests (Playwright, e2e/, Pixel 7 + desktop) (+16 more)
 
 ### Community 5 - "generate-image-placeholders.mjs"
-Cohesion: 0.13
-Nodes (13): files, imagesDir, listImages(), output, placeholders, root, optional(), withPlaceholder() (+5 more)
+Cohesion: 0.15
+Nodes (9): files, imagesDir, listImages(), output, placeholders, root, sites, contrast() (+1 more)
 
 ### Community 6 - "Layout raíz, navegación y tema"
 Cohesion: 0.10
@@ -161,7 +161,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `{ config, content }`, `Theme flow (config.theme -> themeToCssVars -> --brand-* -> globals.css @theme inline)`, `Colocated unit tests (Vitest + Testing Library)` to the rest of the system?**
   _17 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Páginas y metadatos SEO` be split into smaller, more focused modules?**
-  _Cohesion score 0.07886904761904762 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07329192546583851 - nodes in this community are weakly interconnected._
 - **Why does `vitest` connect `vitest` to `Páginas y metadatos SEO`, `icons.tsx`, `generate-image-placeholders.mjs`, `Layout raíz, navegación y tema`, `next`, `[slug]/page.tsx`, `ContactSection.tsx`, `useSwipeTrack.ts`, `package.json`, `@vitejs/plugin-react`?**
   _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **Should `devDependencies` be split into smaller, more focused modules?**

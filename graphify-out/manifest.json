@@ -420,8 +420,8 @@
     "semantic_hash": ""
   },
   "scripts/generate-image-placeholders.mjs": {
-    "mtime": 1794841598.0,
-    "seen": 1794842733.0755498,
+    "mtime": 1794841599.0,
+    "seen": 1794847975.90007,
     "ast_hash": "7b501a93fd2e655fd79dd48b433ee779",
     "semantic_hash": ""
   },
@@ -492,15 +492,15 @@
     "semantic_hash": ""
   },
   "src/generated/image-placeholders.json": {
-    "mtime": 1794842684.2702065,
-    "seen": 1794842733.07559,
+    "mtime": 1794842822.6684272,
+    "seen": 1794847975.900117,
     "ast_hash": "8a80554c91d9fca8acb82f023de02f11",
     "semantic_hash": ""
   },
   "src/lib/images.test.ts": {
-    "mtime": 1794841598.0,
-    "seen": 1794842733.075596,
-    "ast_hash": "d70ed8a79573b94d9a202d4235b594e3",
+    "mtime": 1794847960.0268507,
+    "seen": 1794847975.900123,
+    "ast_hash": "93927faca48e54b46c15235f27ef4e2f",
     "semantic_hash": ""
   },
   "src/lib/images.ts": {
